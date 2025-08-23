@@ -1,8 +1,10 @@
 import os
-from typing import Any, TypedDict
+from typing import Any, TypedDict, Literal
 import reflex as rx
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
+
+from template import ChatDocument, QA
 
 import pymongo
 from dotenv import load_dotenv
@@ -25,27 +27,8 @@ except pymongo.errors.ConnectionFailure as e:
     # mongo_db = None
     sys.exit(1) # Terminate the app if MongoDB connection fails
 
-class QA(TypedDict):
-    """A question and answer pair."""
-
-    question: str
-    answer: str
-
-# MongoDB document structure for a single chat.
-# Note: In Python, you can use a regular dict as well.
-# This is for clarity.
-class ChatDocument(TypedDict):
-    chat_name: str
-    history: list[QA]
-
 class State(rx.State):
     """The app state."""
-
-    # A dict from the chat name to the list of questions and answers.
-    # _chats: dict[str, list[QA]] = {
-    #     "Intros": [],
-    # }
-    # Remove the in-memory dictionary.
 
     # The current chat name.
     current_chat = "Intros"
