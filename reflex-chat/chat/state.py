@@ -58,6 +58,9 @@ class State(rx.State):
 
     _history: list[QA] = []  # <--- 이 변수를 추가하세요.
 
+    # Trigger for chat list updates
+    _chat_list_trigger: int = 0
+
     # 🌟 이 부분을 추가하세요.
     def init(self):
         """Called when the state is initialized."""
@@ -77,6 +80,11 @@ class State(rx.State):
     @rx.var
     def chat_titles(self) -> list[str]:
         """Get the list of chat titles from the database."""
+
+        # 🌟 트리거 변수를 참조하여 의존성을 만듭니다.
+        if self._chat_list_trigger is not None:
+            pass # 이 변수의 실제 값은 중요하지 않음, 변경되었는지만 중요함
+
         if mongo_db is None:
             return ["Database Not Connected"]
         
@@ -113,6 +121,9 @@ class State(rx.State):
         self.current_chat = new_chat_name
         self.is_modal_open = False
 
+        # Update chat list trigger
+        self._chat_list_trigger += 1
+
     @rx.event
     def delete_chat(self, chat_name: str):
         """Delete a chat from the database."""
@@ -130,6 +141,9 @@ class State(rx.State):
         else:
             # If all chats are deleted, create a new "Intros" chat.
             self.create_chat({"new_chat_name": "Intros"})
+
+        # Update chat list trigger
+        self._chat_list_trigger += 1
 
     @rx.event
     def set_chat(self, chat_name: str):
