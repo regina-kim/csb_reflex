@@ -4,16 +4,16 @@ import reflex as rx
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
-# Checking if the API key is set properly
-if not os.getenv("OPENAI_API_KEY"):
-    raise Exception("Please set OPENAI_API_KEY environment variable.")
-
 import pymongo
 from dotenv import load_dotenv
 
 load_dotenv() # Loads environment variables from the .env file.
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME = os.getenv("DB_NAME", "csb_db")
+
+# Checking if the API key is set properly
+if not os.getenv("OPENAI_API_KEY"):
+    raise Exception("Please set OPENAI_API_KEY environment variable.")
 
 # Define global MongoDB Client&Database.
 try:
@@ -179,64 +179,6 @@ class State(rx.State):
         # 2. OpenAI 응답을 처리하는 함수를 호출합니다.
         async for value in self.openai_process_question(question):
             yield value
-
-    # @rx.event
-    # async def openai_process_question(self, question: str):
-    #     """Get the response from the API and save to the database."""
-    #     if mongo_db is None:
-    #         return
-
-    #     # fetch the current chat document and update history
-    #     doc = mongo_db.chats.find_one({"chat_name": self.current_chat})
-    #     if not doc:
-    #         return
-
-    #     history = doc.get("history", [])
-    #     history.append(QA(question=question, answer=""))
-
-    #     mongo_db.chats.update_one(
-    #         {"chat_name": self.current_chat},
-    #         {"$set": {"history": list(self._history)}}
-    #     )
-
-    #     self._history = history
-    #     self.processing = True
-    #     yield
-
-    #     # Build the messages for OpenAI
-    #     messages: list[ChatCompletionMessageParam] = [
-    #         {"role": "system", "content": "You are a friendly chatbot named Reflex. Respond in markdown."}
-    #     ]
-    #     for qa in history:
-    #         messages.append({"role": "user", "content": qa["question"]})
-    #         messages.append({"role": "assistant", "content": qa["answer"]})
-
-    #     # The last message is a user question, remove the assistant's mock answer.
-    #     messages = messages[:-1]
-
-    #     # Start a new session with OpenAI.
-    #     session = OpenAI().chat.completions.create(
-    #         model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
-    #         messages=messages,
-    #         stream=True,
-    #     )
-
-    #     # Stream the results and update the database with the answer.
-    #     for item in session:
-    #         if hasattr(item.choices[0].delta, "content"):
-    #             answer_text = item.choices[0].delta.content
-    #             if answer_text is not None:
-    #                 # Append to the last answer in the history list.
-    #                 self._history[-1]["answer"] += answer_text 
-                    
-    #                 # 3. Update the database
-    #                 mongo_db.chats.update_one(
-    #                     {"chat_name": self.current_chat},
-    #                     {"$set": {"history": list(self._history)}}
-    #                 )
-    #                 yield
-
-    #     self.processing = False
 
     @rx.event
     async def openai_process_question(self, question: str):
